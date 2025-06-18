@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Video Rating Experiment</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+    #ratingForm { display: none; margin-top: 20px; }
+    label, select, button { font-size: 1.2em; margin: 10px; }
+    video { width: 80%; max-width: 800px; }
+    #log { margin-top: 30px; font-size: 0.9em; white-space: pre-wrap; text-align: left; }
+  </style>
+</head>
+<body>
+
+  <h1>Video Experience Rating</h1>
+  <video id="videoPlayer" controls>
+    <source src="https://drive.google.com/file/d/1ZzpovjoGRv9n2EojbsZ2AW9Vw8sozbvb/view?usp=drive_link" type="video/mp4"> #https://www.youtube.com/watch?v=Zm41l34hbLE&t=472s
+    Your browser does not support the video tag.
+  </video>
+
+  <div id="ratingForm">
+    <p>How are you feeling right now?</p>
+    <select id="rating">
+      <option value="" disabled selected>Select a rating</option>
+      <option value="1">1 - Very Negative</option>
+      <option value="2">2 - Negative</option>
+      <option value="3">3 - Neutral</option>
+      <option value="4">4 - Positive</option>
+      <option value="5">5 - Very Positive</option>
+    </select><br>
+    <button onclick="submitRating()">Submit</button>
+  </div>
+
+  <div id="log"></div>
+
+  <script>
+    const video = document.getElementById("videoPlayer");
+    const form = document.getElementById("ratingForm");
+    const ratingSelect = document.getElementById("rating");
+    const logDiv = document.getElementById("log");
+
+    let dataLog = [];
+
+    document.body.addEventListener("keydown", (e) => {
+      if (e.code === "Space" && !form.style.display.includes("block")) {
+        e.preventDefault();
+        pauseAndPrompt();
+      }
+    });
+
+    function pauseAndPrompt() {
+      video.pause();
+      form.style.display = "block";
+      ratingSelect.value = ""; // reset
+    }
+
+    function submitRating() {
+      const rating = ratingSelect.value;
+      if (!rating) {
+        alert("Please select a rating.");
+        return;
+      }
+
+      const currentTime = video.currentTime.toFixed(2);
+      dataLog.push({ time: currentTime, rating: rating });
+
+      updateLog();
+
+      form.style.display = "none";
+      video.play();
+    }
+
+    function updateLog() {
+      let text = "Rating Log:\n";
+      dataLog.forEach((entry, i) => {
+        text += `#${i + 1} — Time: ${entry.time}s | Rating: ${entry.rating}\n`;
+      });
+      logDiv.textContent = text;
+    }
+  </script>
+
+</body>
+</html>
