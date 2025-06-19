@@ -4,102 +4,107 @@
   <meta charset="UTF-8">
   <title>Video Rating Experiment</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-    #ratingForm { display: none; margin-top: 20px; }
-    label, select, button { font-size: 1.2em; margin: 10px; }
-    video { width: 80%; max-width: 800px; }
-    #log { margin-top: 30px; font-size: 0.9em; white-space: pre-wrap; text-align: left; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    #ratingForm, #exportBtn {
+      display: none;
+      margin-top: 20px;
+    }
+    #finalScreen {
+      display: none;
+      padding: 40px;
+    }
   </style>
 </head>
 <body>
 
-
-
-############# 
-
-
-#             TO DOs:  (1) Insert a page that records PIDs 
-#                      (2) need to create a page that displays the instructions for the task. 
-#                      (3) export responses as csv file to designated google drive 
-#                       ** Also consider (a) forcing full screen w/ esc key, (b) disabling the mouse cursor, (c) a warning or something if participant navigates away  ;) 
-
-
-
-  <h1>!!Video Experience Rating Skeleton!!</h1>
-  <video id="videoPlayer" controls>
-    <source src="https://www.dropbox.com/scl/fi/y9celgwtby8447xv44jf3/stimulus2.mp4?rlkey=eubowr9pir2viwuan0krjessz&st=9axydcfk&raw=1" type="video/mp4"> #Ernesto hoost tutorial video: https://www.dropbox.com/scl/fi/b61cmafka2xne79jrwg1f/stimulus.mp4?rlkey=no1i84sd4dmv1rn4f40zka21l&st=jkcr3uas&raw=1
-    Your browser does not support the video tag.
-  </video>
-
-  <div id="ratingForm">
-    <p>How are you feeling right now?</p>
-    <select id="rating">
-      <option value="" disabled selected>Select a rating</option>
-      <option value="1">1 - Very Negative</option>
-      <option value="2">2 - Negative</option>
-      <option value="3">3 - Neutral</option>
-      <option value="4">4 - Positive</option>
-      <option value="5">5 - Very Positive</option>
-    </select><br>
-    <button onclick="submitRating()">Submit</button>
+  <!-- ============ 1. WELCOME SCREEN ============ -->
+  <div id="welcomeScreen">
+    <h2>Welcome to the Study</h2>
+    <p>Please enter your Participant ID Number (PIDN) and read the instructions:</p>
+    <ul style="text-align: left; max-width: 600px; margin: auto;">
+      <li>Watch the 30-minute video.</li>
+      <li>Press <strong>spacebar</strong> any time to pause and rate your experience.</li>
+      <li>After rating, the video will resume.</li>
+    </ul>
+    <p><strong>Enter your PIDN:</strong></p>
+    <input type="text" id="pidnInput" placeholder="e.g., P1234">
+    <br><br>
+    <button onclick="startExperiment()">Start</button>
   </div>
 
+  <!-- ============ 2. EXPERIMENT SECTION ============ -->
+  <div id="experimentContainer" style="display:none;">
+    <!-- 2a. VIDEO PLAYER -->
+    <video id="videoPlayer" width="800" controls>
+      <source src="https://www.dropbox.com/scl/fi/y9celgwtby8447xv44jf3/stimulus2.mp4?rlkey=eubowr9pir2viwuan0krjessz&st=9axydcfk&raw=1" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
 
+    <!-- 2b. RATING FORM -->
+    <div id="ratingForm">
+      <p>How are you feeling right now?</p>
+      <select id="rating">
+        <option value="">Select a rating</option>
+        <option value="1">1 - Very Negative</option>
+        <option value="2">2 - Negative</option>
+        <option value="3">3 - Neutral</option>
+        <option value="4">4 - Positive</option>
+        <option value="5">5 - Very Positive</option>
+      </select>
+      <br><br>
+      <button onclick="submitRating()">Submit Rating</button>
+    </div>
 
+    <!-- 2c. FINALIZE -->
+    <button id="exportBtn">Finish & Submit My Data</button>
+    <div id="log"></div>
+  </div>
 
+  <!-- ============ 3. FINAL CONFIRMATION SCREEN ============ -->
+  <div id="finalScreen">
+    <h2>Thank You!</h2>
+    <p>Your responses have been submitted.</p>
+    <p>You may now close this window.</p>
+  </div>
 
-
-
-
-
-
-
-
-
-
-  
-  <div id="log"></div>
-
+  <!-- ============ 4. SCRIPT ============ -->
   <script>
+    // Element references
     const video = document.getElementById("videoPlayer");
     const form = document.getElementById("ratingForm");
     const ratingSelect = document.getElementById("rating");
     const logDiv = document.getElementById("log");
+    const exportBtn = document.getElementById("exportBtn");
 
-    let dataLog = [];
+    let dataLog = [];          // Store responses
+    let participantID = null;  // Store PIDN
 
-
-////////////////// inserting the code that will allow exporting of the data to a csv file. (6.19.25)
-function sendDataToSheet() {
-  fetch("AKfycbwMDyEZtQYAss71ufkqaQjgJbbp5PUqVW8yfXKkmarQ", {
-    method: "POST",
-    body: JSON.stringify(dataLog),
-    headers: {
-      "Content-Type": "application/json"
+    // Start experiment: store PIDN, hide welcome screen
+    function startExperiment() {
+      const pidn = document.getElementById("pidnInput").value.trim();
+      if (!pidn) {
+        alert("Please enter a valid PIDN.");
+        return;
+      }
+      participantID = pidn;
+      document.getElementById("welcomeScreen").style.display = "none";
+      document.getElementById("experimentContainer").style.display = "block";
     }
-  })
-  .then(response => response.text())
-  .then(result => {
-    console.log("Data sent to Google Sheet:", result);
-  })
-  .catch(error => {
-    console.error("Error sending data to Google Sheet:", error);
-  });
-} //////////////////////////// end of new block
 
-    document.body.addEventListener("keydown", (e) => {
-      if (e.code === "Space" && !form.style.display.includes("block")) {
-        e.preventDefault();
-        pauseAndPrompt();
+    // Pause video and show form on spacebar
+    document.addEventListener("keydown", function(event) {
+      if (event.code === "Space" && form.style.display !== "block") {
+        event.preventDefault();
+        video.pause();
+        form.style.display = "block";
       }
     });
 
-    function pauseAndPrompt() {
-      video.pause();
-      form.style.display = "block";
-      ratingSelect.value = ""; // reset
-    }
-
+    // On rating submission: log response and send to Sheet
     function submitRating() {
       const rating = ratingSelect.value;
       if (!rating) {
@@ -107,44 +112,82 @@ function sendDataToSheet() {
         return;
       }
 
-      const currentTime = video.currentTime.toFixed(2);
-      dataLog.push({ time: currentTime, rating: rating });
-
-      updateLog();
+      const time = video.currentTime.toFixed(2);
+      dataLog.push({ pidn: participantID, time, rating });
 
       form.style.display = "none";
+      ratingSelect.value = "";
       video.play();
+      updateLog();
+      sendDataToSheet(); // Send each rating to Google Sheets
+
+      if (dataLog.length === 1) {
+        exportBtn.style.display = "inline-block"; // Show finish button after first rating
+      }
     }
 
+    // Visual log of responses
     function updateLog() {
-      let text = "Rating Log:\n";
-      dataLog.forEach((entry, i) => {
-        text += `#${i + 1} — Time: ${entry.time}s | Rating: ${entry.rating}\n`;
+      logDiv.innerHTML = "<h3>Logged Ratings</h3><ul>" +
+        dataLog.map(entry => `<li>${entry.time}s — Rating: ${entry.rating}</li>`).join("") +
+        "</ul>";
+    }
+
+    // Finish button → Generate and upload CSV, then confirm
+    exportBtn.addEventListener("click", () => {
+      const csvContent = convertToCSV(dataLog);
+      uploadCSV(csvContent, participantID);
+    });
+
+    // Convert log array to CSV
+    function convertToCSV(arr) {
+      const header = Object.keys(arr[0]).join(",") + "\n";
+      const rows = arr.map(obj => Object.values(obj).join(",")).join("\n");
+      return header + rows;
+    }
+
+    // Upload CSV to Google Drive using Google Apps Script
+    function uploadCSV(csv, pidn) {
+      const filename = `PIDN_${pidn}_data.csv`;
+
+      const formData = new FormData();
+      formData.append("csv", csv);
+      formData.append("filename", filename);
+
+      fetch("https://script.google.com/macros/s/AKfycbwMDyEZtQYAss71ufkqaQjgJbbp5PUqVW8yfXKkmarQ/exec?mode=upload", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.text())
+      .then(result => {
+        console.log("Upload response:", result);
+        endExperiment(); // Show final screen
+      })
+      .catch(err => {
+        console.error("Upload error:", err);
+        alert("Something went wrong. Please try again.");
       });
-      logDiv.textContent = text;
     }
 
-    //////////////////// new function to send data to Google Sheets 6.19.25
+    // Send each rating to Google Sheet (optional)
     function sendDataToSheet() {
-  fetch("YOUR_WEB_APP_URL", {
-    method: "POST",
-    body: JSON.stringify(dataLog),
-    headers: {
-      "Content-Type": "application/json"
+      fetch("https://script.google.com/macros/s/AKfycbwMDyEZtQYAss71ufkqaQjgJbbp5PUqVW8yfXKkmarQ/exec", {
+        method: "POST",
+        body: JSON.stringify(dataLog),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.text())
+      .then(result => console.log("Sheet update:", result))
+      .catch(err => console.error("Sheet error:", err));
     }
-  })
-  .then(response => response.text())
-  .then(result => {
-    console.log("Data sent to Google Sheet:", result);
-  })
-  .catch(error => {
-    console.error("Error sending data to Google Sheet:", error);
-  });
-} ////////////////end of new function
 
-
-
+    // Hide experiment, show final thank-you
+    function endExperiment() {
+      document.getElementById("experimentContainer").style.display = "none";
+      document.getElementById("finalScreen").style.display = "block";
+    }
   </script>
-
 </body>
 </html>
