@@ -44,6 +44,20 @@
     <button onclick="submitRating()">Submit</button>
   </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   <div id="log"></div>
 
   <script>
@@ -53,6 +67,25 @@
     const logDiv = document.getElementById("log");
 
     let dataLog = [];
+
+
+////////////////// inserting the code that will allow exporting of the data to a csv file. (6.19.25)
+function sendDataToSheet() {
+  fetch("YOUR_WEB_APP_URL", {
+    method: "POST",
+    body: JSON.stringify(dataLog),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  .then(response => response.text())
+  .then(result => {
+    console.log("Data sent to Google Sheet:", result);
+  })
+  .catch(error => {
+    console.error("Error sending data to Google Sheet:", error);
+  });
+} //////////////////////////// end of new block
 
     document.body.addEventListener("keydown", (e) => {
       if (e.code === "Space" && !form.style.display.includes("block")) {
@@ -90,6 +123,27 @@
       });
       logDiv.textContent = text;
     }
+
+    //////////////////// new function to send data to Google Sheets 6.19.25
+    function sendDataToSheet() {
+  fetch("YOUR_WEB_APP_URL", {
+    method: "POST",
+    body: JSON.stringify(dataLog),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  .then(response => response.text())
+  .then(result => {
+    console.log("Data sent to Google Sheet:", result);
+  })
+  .catch(error => {
+    console.error("Error sending data to Google Sheet:", error);
+  });
+} ////////////////end of new function
+
+
+
   </script>
 
 </body>
