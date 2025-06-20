@@ -146,15 +146,34 @@
       return header + rows;
     }
 
-    // Upload CSV to Google Drive using Google Apps Script
-    function uploadCSV(csv, pidn) {
+    
+
+    // Send each rating to Google Sheet  
+    function sendDataToSheet() {
+      fetch("https://script.google.com/macros/s/AKfycbxRRvF0Cb5PAHa03noifSxlfXUbo6y9PUCOXjwU09YsN7-INqhYMgUi36hBAY4uIM5egg/exec", {
+        method: "POST",
+        body: JSON.stringify(dataLog),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.text())
+      .then(result => console.log("Sheet update:", result))
+      .catch(err => console.error("Sheet error:", err));
+    }
+
+
+
+
+// Upload CSV to Google Drive using Google Apps Script
+function uploadCSV(csv, pidn) {
       const filename = `PIDN_${pidn}_data.csv`;
 
       const formData = new FormData();
       formData.append("csv", csv);
       formData.append("filename", filename);
-
-      fetch("https://script.google.com/macros/s/AKfycbwMDyEZtQYAss71ufkqaQjgJbbp5PUqVW8yfXKkmarQ/exec?mode=upload", {
+      formData.append("pidn", pidn);
+      fetch("https://script.google.com/macros/s/AKfycbxRRvF0Cb5PAHa03noifSxlfXUbo6y9PUCOXjwU09YsN7-INqhYMgUi36hBAY4uIM5egg/exec?mode=upload", {
         method: "POST",
         body: formData
       })
@@ -169,25 +188,21 @@
       });
     }
 
-    // Send each rating to Google Sheet (optional)
-    function sendDataToSheet() {
-      fetch("https://script.google.com/macros/s/AKfycbwMDyEZtQYAss71ufkqaQjgJbbp5PUqVW8yfXKkmarQ/exec", {
-        method: "POST",
-        body: JSON.stringify(dataLog),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(res => res.text())
-      .then(result => console.log("Sheet update:", result))
-      .catch(err => console.error("Sheet error:", err));
-    }
 
     // Hide experiment, show final thank-you
     function endExperiment() {
       document.getElementById("experimentContainer").style.display = "none";
       document.getElementById("finalScreen").style.display = "block";
     }
+
+
+
+
+
+
+
+
+
   </script>
 </body>
 </html>
