@@ -23,7 +23,7 @@
 
   <!-- ========== 1. Welcome / Instructions ========== -->
   <div id="welcomeScreen">
-    <h2>Welcome to the Study</h2>
+    <h2>Welcome to the beta version of the video rating task!</h2>
     <p>Please enter your Participant ID Number (PIDN) and read the instructions:</p>
     <ul style="text-align: left; max-width: 600px; margin: auto;">
       <li>Watch the video carefully.</li>
@@ -31,7 +31,7 @@
       <li>After rating, the video will resume automatically.</li>
     </ul>
     <p><strong>Enter your PIDN:</strong></p>
-    <input type="text" id="pidnInput" placeholder="e.g., P1234">
+    <input type="text" id="pidnInput" placeholder="e.g., 1234">
     <br><br>
     <button onclick="startExperiment()">Start</button>
   </div>
@@ -134,7 +134,7 @@
 
     // --- Send each rating to Google Sheets (using Apps Script doPost) ---
     function sendDataToSheet() {
-      fetch("Yhttps://script.google.com/macros/s/AKfycbxRRvF0Cb5PAHa03noifSxlfXUbo6y9PUCOXjwU09YsN7-INqhYMgUi36hBAY4uIM5egg/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbxRRvF0Cb5PAHa03noifSxlfXUbo6y9PUCOXjwU09YsN7-INqhYMgUi36hBAY4uIM5egg/exec", {
         method: "POST",
         body: JSON.stringify(dataLog),
         headers: {
