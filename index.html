@@ -21,14 +21,14 @@
 </head>
 <body>
 
-  <!-- ============ 1. WELCOME SCREEN ============ -->
+  <!-- ========== 1. Welcome / Instructions ========== -->
   <div id="welcomeScreen">
     <h2>Welcome to the Study</h2>
     <p>Please enter your Participant ID Number (PIDN) and read the instructions:</p>
     <ul style="text-align: left; max-width: 600px; margin: auto;">
-      <li>Watch the 30-minute video.</li>
-      <li>Press <strong>spacebar</strong> any time to pause and rate your experience.</li>
-      <li>After rating, the video will resume.</li>
+      <li>Watch the video carefully.</li>
+      <li>Press <strong>spacebar</strong> at any time to pause and rate your experience.</li>
+      <li>After rating, the video will resume automatically.</li>
     </ul>
     <p><strong>Enter your PIDN:</strong></p>
     <input type="text" id="pidnInput" placeholder="e.g., P1234">
@@ -36,15 +36,15 @@
     <button onclick="startExperiment()">Start</button>
   </div>
 
-  <!-- ============ 2. EXPERIMENT SECTION ============ -->
+  <!-- ========== 2. Experiment: Video + Rating + Submit ========== -->
   <div id="experimentContainer" style="display:none;">
-    <!-- 2a. VIDEO PLAYER -->
+    <!-- 2a. Video Player -->
     <video id="videoPlayer" width="800" controls>
       <source src="https://www.dropbox.com/scl/fi/y9celgwtby8447xv44jf3/stimulus2.mp4?rlkey=eubowr9pir2viwuan0krjessz&st=9axydcfk&raw=1" type="video/mp4">
       Your browser does not support the video tag.
     </video>
 
-    <!-- 2b. RATING FORM -->
+    <!-- 2b. Rating Form -->
     <div id="ratingForm">
       <p>How are you feeling right now?</p>
       <select id="rating">
@@ -59,31 +59,31 @@
       <button onclick="submitRating()">Submit Rating</button>
     </div>
 
-    <!-- 2c. FINALIZE -->
+    <!-- 2c. Export Button -->
     <button id="exportBtn">Finish & Submit My Data</button>
     <div id="log"></div>
   </div>
 
-  <!-- ============ 3. FINAL CONFIRMATION SCREEN ============ -->
+  <!-- ========== 3. Final Screen ========== -->
   <div id="finalScreen">
     <h2>Thank You!</h2>
     <p>Your responses have been submitted.</p>
     <p>You may now close this window.</p>
   </div>
 
-  <!-- ============ 4. SCRIPT ============ -->
+  <!-- ========== 4. Script ========== -->
   <script>
-    // Element references
+    // --- Variables ---
     const video = document.getElementById("videoPlayer");
     const form = document.getElementById("ratingForm");
     const ratingSelect = document.getElementById("rating");
     const logDiv = document.getElementById("log");
     const exportBtn = document.getElementById("exportBtn");
 
-    let dataLog = [];          // Store responses
-    let participantID = null;  // Store PIDN
+    let dataLog = [];         // Store all rating events
+    let participantID = null; // Store PIDN from user input
 
-    // Start experiment: store PIDN, hide welcome screen
+    // --- Start the experiment ---
     function startExperiment() {
       const pidn = document.getElementById("pidnInput").value.trim();
       if (!pidn) {
@@ -95,16 +95,16 @@
       document.getElementById("experimentContainer").style.display = "block";
     }
 
-    // Pause video and show form on spacebar
+    // --- Pause video on spacebar and show rating form ---
     document.addEventListener("keydown", function(event) {
       if (event.code === "Space" && form.style.display !== "block") {
-        event.preventDefault();
+        event.preventDefault();  // Prevent page scroll
         video.pause();
         form.style.display = "block";
       }
     });
 
-    // On rating submission: log response and send to Sheet
+    // --- Handle rating submission ---
     function submitRating() {
       const rating = ratingSelect.value;
       if (!rating) {
@@ -112,45 +112,29 @@
         return;
       }
 
-      const time = video.currentTime.toFixed(2);
+      const time = video.currentTime.toFixed(2); // Timestamp in seconds
       dataLog.push({ pidn: participantID, time, rating });
 
+      // Reset form and resume video
       form.style.display = "none";
       ratingSelect.value = "";
       video.play();
-      updateLog();
-      sendDataToSheet(); // Send each rating to Google Sheets
+      updateLog();         // Show ratings on screen
+      sendDataToSheet();   // Save to Google Sheet
 
-      if (dataLog.length === 1) {
-        exportBtn.style.display = "inline-block"; // Show finish button after first rating
-      }
+      exportBtn.style.display = "inline-block"; // Show finish button after first rating
     }
 
-    // Visual log of responses
+    // --- Visual feedback for user ---
     function updateLog() {
       logDiv.innerHTML = "<h3>Logged Ratings</h3><ul>" +
         dataLog.map(entry => `<li>${entry.time}s — Rating: ${entry.rating}</li>`).join("") +
         "</ul>";
     }
 
-    // Finish button → Generate and upload CSV, then confirm
-    exportBtn.addEventListener("click", () => {
-      const csvContent = convertToCSV(dataLog);
-      uploadCSV(csvContent, participantID);
-    });
-
-    // Convert log array to CSV
-    function convertToCSV(arr) {
-      const header = Object.keys(arr[0]).join(",") + "\n";
-      const rows = arr.map(obj => Object.values(obj).join(",")).join("\n");
-      return header + rows;
-    }
-
-    
-
-    // Send each rating to Google Sheet  
+    // --- Send each rating to Google Sheets (using Apps Script doPost) ---
     function sendDataToSheet() {
-      fetch("https://script.google.com/macros/s/AKfycbxRRvF0Cb5PAHa03noifSxlfXUbo6y9PUCOXjwU09YsN7-INqhYMgUi36hBAY4uIM5egg/exec", {
+      fetch("Yhttps://script.google.com/macros/s/AKfycbxRRvF0Cb5PAHa03noifSxlfXUbo6y9PUCOXjwU09YsN7-INqhYMgUi36hBAY4uIM5egg/exec", {
         method: "POST",
         body: JSON.stringify(dataLog),
         headers: {
@@ -162,47 +146,47 @@
       .catch(err => console.error("Sheet error:", err));
     }
 
+    // --- Finish: Convert to CSV and send to Drive ---
+    exportBtn.addEventListener("click", () => {
+      const csvContent = convertToCSV(dataLog);
+      uploadCSV(csvContent, participantID);
+    });
 
+    // --- Convert JS object array to CSV string ---
+    function convertToCSV(arr) {
+      const header = Object.keys(arr[0]).join(",") + "\n";
+      const rows = arr.map(obj => Object.values(obj).join(",")).join("\n");
+      return header + rows;
+    }
 
-
-// Upload CSV to Google Drive using Google Apps Script
-function uploadCSV(csv, pidn) {
+    // --- Upload CSV to Google Drive via Apps Script ?mode=upload ---
+    function uploadCSV(csv, pidn) {
       const filename = `PIDN_${pidn}_data.csv`;
-
       const formData = new FormData();
       formData.append("csv", csv);
       formData.append("filename", filename);
-      formData.append("pidn", pidn);
+
       fetch("https://script.google.com/macros/s/AKfycbxRRvF0Cb5PAHa03noifSxlfXUbo6y9PUCOXjwU09YsN7-INqhYMgUi36hBAY4uIM5egg/exec?mode=upload", {
         method: "POST",
         body: formData
       })
       .then(res => res.text())
       .then(result => {
-        console.log("Upload response:", result);
+        console.log("Drive Upload:", result);
         endExperiment(); // Show final screen
       })
       .catch(err => {
         console.error("Upload error:", err);
-        alert("Something went wrong. Please try again.");
+        alert("Upload failed. Please contact the researcher.");
       });
     }
 
-
-    // Hide experiment, show final thank-you
+    // --- Show final confirmation screen ---
     function endExperiment() {
       document.getElementById("experimentContainer").style.display = "none";
       document.getElementById("finalScreen").style.display = "block";
     }
-
-
-
-
-
-
-
-
-
   </script>
+
 </body>
 </html>
