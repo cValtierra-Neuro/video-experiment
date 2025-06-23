@@ -132,19 +132,19 @@
         "</ul>";
     }
 
-    // --- Send each rating to Google Sheets (using Apps Script doPost) ---
-    function sendDataToSheet() {
-      fetch("https://script.google.com/macros/s/AKfycbyODYcuM6rgHXrlzP1LW5TAk06uQQ_3beTuoH-hQqQRles6mXq7hV0igr1xF8JyhUukBA/exec", {
-        method: "POST",
-        body: JSON.stringify(dataLog),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(res => res.text())
-      .then(result => console.log("Sheet update:", result))
-      .catch(err => console.error("Sheet error:", err));
-    }
+    // --- Send each rating to Google Sheets (using Apps Script doPost) --- TEMP FIX, SINCE THIS SECTION IS NOT WORKING
+   // function sendDataToSheet() {
+   //   fetch("https://script.google.com/macros/s/AKfycbyODYcuM6rgHXrlzP1LW5TAk06uQQ_3beTuoH-hQqQRles6mXq7hV0igr1xF8JyhUukBA/exec", {
+   //     method: "POST",
+   //     body: JSON.stringify(dataLog),
+   //     headers: {
+   //       "Content-Type": "application/json"
+   //     }
+   //   })
+   //   .then(res => res.text())
+   //   .then(result => console.log("Sheet update:", result))
+   //   .catch(err => console.error("Sheet error:", err));
+   // }
 
     // --- Finish: Convert to CSV and send to Drive ---
     exportBtn.addEventListener("click", () => {
