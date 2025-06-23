@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Video Rating Experiment</title>
+  <title>Video Rating Experiment (beta)</title>
   <style>
     body {
       font-family: sans-serif;
@@ -134,7 +134,7 @@
 
     // --- Send each rating to Google Sheets (using Apps Script doPost) ---
     function sendDataToSheet() {
-      fetch("https://script.google.com/macros/s/AKfycbxRRvF0Cb5PAHa03noifSxlfXUbo6y9PUCOXjwU09YsN7-INqhYMgUi36hBAY4uIM5egg/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbyODYcuM6rgHXrlzP1LW5TAk06uQQ_3beTuoH-hQqQRles6mXq7hV0igr1xF8JyhUukBA/exec", {
         method: "POST",
         body: JSON.stringify(dataLog),
         headers: {
@@ -166,7 +166,7 @@
       formData.append("csv", csv);
       formData.append("filename", filename);
 
-      fetch("https://script.google.com/macros/s/AKfycbxRRvF0Cb5PAHa03noifSxlfXUbo6y9PUCOXjwU09YsN7-INqhYMgUi36hBAY4uIM5egg/exec?mode=upload", {
+      fetch("https://script.google.com/macros/s/AKfycbyODYcuM6rgHXrlzP1LW5TAk06uQQ_3beTuoH-hQqQRles6mXq7hV0igr1xF8JyhUukBA/exec?mode=upload", {
         method: "POST",
         body: formData
       })
